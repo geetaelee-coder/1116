@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아산 가을 힐링 드라이브 스마트 가이드북</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Noto Sans KR & Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-start pb-20">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl flex flex-col relative overflow-hidden">
+        
+        <!-- Top Sticky Header -->
+        <header class="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-5 py-4 sticky top-0 z-40 shadow-md flex items-center justify-between">
+            <div>
+                <span class="text-xs bg-amber-700/60 px-2 py-0.5 rounded-full font-medium tracking-wide">11월 4일 (수) 자차 드라이브</span>
+                <h1 class="text-xl font-black tracking-tight mt-0.5">🍁 아산 힐링 가이드북</h1>
+            </div>
+            <button onclick="openToast('데이터 기반 최적화 동선이 적용되었습니다!')" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition">
+                <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+            </button>
+        </header>
+
+        <!-- Main Content View Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto pb-6">
+            <!-- Dynamically Loaded Views -->
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 flex justify-around py-3 px-2 shadow-lg">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-orange-600 font-semibold transition">
+                <i data-lucide="home" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">홈</span>
+            </button>
+            <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center text-slate-400 hover:text-orange-600 transition">
+                <i data-lucide="calendar" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">일정표</span>
+            </button>
+            <button onclick="switchTab('map')" id="nav-map" class="flex flex-col items-center text-slate-400 hover:text-orange-600 transition">
+                <i data-lucide="map" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">동선지도</span>
+            </button>
+            <button onclick="switchTab('food')" id="nav-food" class="flex flex-col items-center text-slate-400 hover:text-orange-600 transition">
+                <i data-lucide="utensils" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">맛집&카페</span>
+            </button>
+            <button onclick="switchTab('tips')" id="nav-tips" class="flex flex-col items-center text-slate-400 hover:text-orange-600 transition">
+                <i data-lucide="shield-alert" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">필수팁</span>
+            </button>
+        </nav>
+
+        <!-- Toast Notification Box -->
+        <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center space-x-2">
+            <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+            <span id="toast-msg">알림 메시지</span>
+        </div>
+
+    </div>
+
+    <!-- Application JavaScript -->
+    <script>
+        // Data Store for Asan Trip
+        const tripData = {
+            date: "2026년 11월 4일 (수요일)",
+            theme: "곡교천 은행나무길 & 온양온천 힐링 드라이브",
+            stats: {
+                totalDistance: "수원 출발 자차 연계 코스",
+                keyEvent: "온양온천 풍물 5일장 개장일 (4일/9일)",
+                budget: "약 4~5만 원 내외 (식사 및 간식 포함)"
+            },
+            schedule: [
+                {
+                    time: "08:30 - 10:00",
+                    title: "곡교천 은행나무길",
+                    category: "자연/산책",
+                    duration: "1시간 30분",
+                    transport: "수원 출발 자차 (약 50분~1시간)",
+                    tip: "오전 일찍 도착해 공영주차장 여유 확보. 아침 햇살과 은행나무 터널 산책 및 사진 촬영.",
+                    mapQuery: "곡교천 은행나무길",
+                    image: "https://placehold.co/600x300/e0f2fe/0369a1?text=Gokgyocheon+Ginkgo+Tree+Road"
+                },
+                {
+                    time: "10:15 - 12:30",
+                    title: "온양온천 전통시장 & 풍물 5일장",
+                    category: "시장구경/미식",
+                    duration: "2시간 15분",
+                    transport: "곡교천에서 차로 약 10분 이동",
+                    tip: "11월 4일 풍물 5일장 열리는 날! 62년 전통 고려제과 빵 쇼핑 및 촌집손칼국수 점심 식사.",
+                    mapQuery: "온양온천 전통시장",
+                    image: "https://placehold.co/600x300/ffedd5/c2410c?text=Onyang+Hot+Spring+Market"
+                },
+                {
+                    time: "12:35 - 13:15",
+                    title: "온양 족욕체험장",
+                    category: "힐링/체험",
+                    duration: "40분",
+                    transport: "시장에서 도보 3~5분 (온양온천역 1번 출구 앞)",
+                    tip: "365일 무료 운영되는 따뜻한 온천수(약 70도). 개인 소형 수건 지참 시 더욱 쾌적함.",
+                    mapQuery: "온양온천역 족욕체험장",
+                    image: "https://placehold.co/600x300/ccfbf1/0f766e?text=Onyang+Foot+Bath"
+                },
+                {
+                    time: "13:25 - 15:30",
+                    title: "온양민속박물관 & 구정아트센터",
+                    category: "문화/예술",
+                    duration: "2시간",
+                    transport: "역 근처에서 차로 약 5분 이동",
+                    tip: "16:30 매표 종료이므로 안전하게 16:00 전 입장 필수! 야외 정원 산책 및 카페 나슬 케이크 휴식.",
+                    mapQuery: "온양민속박물관",
+                    image: "https://placehold.co/600x300/f3e8ff/6b21a8?text=Onyang+Folk+Museum"
+                },
+                {
+                    time: "15:45 - 17:40",
+                    title: "신정호 지방정원",
+                    category: "수변산책/야경",
+                    duration: "2시간",
+                    transport: "박물관에서 차로 약 10분 이동",
+                    tip: "자전거 이용 시 17:30 대여 접수 마감 엄수(2시간 1,000원). 충남 1호 지방정원 수변산책로 5.2km 일몰 감상.",
+                    mapQuery: "신정호 지방정원",
+                    image: "https://placehold.co/600x300/dbeafe/1d4ed8?text=Shinjungho+Lake+Garden"
+                },
+                {
+                    time: "18:00 - 19:20",
+                    title: "먼구리식당 (저녁 식사)",
+                    category: "맛집/오삼불고기",
+                    duration: "1시간 20분",
+                    transport: "신정호에서 차로 약 15분 이동 (배방역 방면)",
+                    tip: "매콤달달한 오삼불고기 전문점. 푸짐한 밑반찬과 계란말이 제공. 현지인 추천 1등 맛집.",
+                    mapQuery: "먼구리식당",
+                    image: "https://placehold.co/600x300/fee2e2/b91c1c?text=Munguri+Restaurant"
+                },
+                {
+                    time: "19:35 - 20:00",
+                    title: "함가네 호떡 & 귀가",
+                    category: "간식/디저트",
+                    duration: "25분",
+                    transport: "식당에서 차로 약 10분 이동 후 수원 귀가",
+                    tip: "10월~3월 계절 한정 운영. 얇고 바삭하며 꿀이 든 감성 호떡으로 드라이브 야식 후 귀가.",
+                    mapQuery: "함가네호떡",
+                    image: "https://placehold.co/600x300/fef3c7/b45309?text=Hamgane+Hotteok"
+                }
+            ],
+            food: [
+                {
+                    name: "촌집손칼국수",
+                    menu: "손칼국수",
+                    price: "7,000원",
+                    desc: "직접 담그는 김치와 얼큰하고 쫀득한 면발의 시장 노포.",
+                    timing: "점심 피크(11:30~12:30) 전후 방문 권장"
+                },
+                {
+                    name: "고려제과",
+                    menu: "야채사라다빵, 맘모스빵, 밤만주",
+                    price: "사라다빵 1,000원 (기타 1,000~1,500원)",
+                    desc: "62년 역사의 옛날 제과점. 유재석도 방문한 가성비 빵집.",
+                    timing: "시장 투어 중 간식 및 귀가 후 포장용"
+                },
+                {
+                    name: "카페 나슬",
+                    menu: "무화과 생크림 케이크, 아인슈패너",
+                    price: "변동 (음료 및 조각케이크)",
+                    desc: "온양민속박물관 인근 시트가 퐁신하고 과일이 듬뿍 들어간 수제 케이크 맛집.",
+                    timing: "박물관 관람 직후 디저트 타임"
+                },
+                {
+                    name: "먼구리식당",
+                    menu: "오삼불고기",
+                    price: "2인분 기준 약 36,000원",
+                    desc: "배방역 인근 현지인 추천 1등 맛집. 매콤달달한 양념과 계란말이.",
+                    timing: "18:00경 저녁 식사"
+                },
+                {
+                    name: "함가네 호떡",
+                    menu: "호떡, 어묵",
+                    price: "호떡 2개 1,000원 / 어묵 3개 1,000원",
+                    desc: "10월~3월 한정 영업. 매우 얇고 바삭한 식감의 꿀호떡.",
+                    timing: "귀가 전 가벼운 야식"
+                }
+            ],
+            tips: [
+                {
+                    title: "11월 4일 풍물 5일장 오픈",
+                    desc: "매월 4일과 9일은 온양온천역 철로 아래에서 대규모 풍물 5일장이 열립니다. 평소 주차장이 장터로 변모하므로 공영주차장 진입을 서두르세요."
+                },
+                {
+                    title: "온양민속박물관 마감 시간 엄수",
+                    desc: "16:30 매표 종료이므로 늦어도 16:00 이전에는 발권을 마쳐야 안정적인 관람이 가능합니다."
+                },
+                {
+                    title: "신정호 자전거 대여 마감",
+                    desc: "자전거 대여 운영은 18:00까지이나 접수는 17:30에 마감됩니다. (2시간 1,000원)"
+                },
+                {
+                    title: "족욕체험장 준비물",
+                    desc: "온양온천역 1번 출구 앞 족욕장에 일회용 티슈가 있으나, 자차 트렁크에 작은 개인 수건을 챙기면 더욱 쾌적합니다."
+                }
+            ]
+        };
+
+        let currentTab = 'home';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update Tab Icons and Styling
+            ['home', 'schedule', 'map', 'food', 'tips'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if(t === tab) {
+                    btn.className = "flex flex-col items-center text-orange-600 font-semibold transition transform scale-105";
+                } else {
+                    btn.className = "flex flex-col items-center text-slate-400 hover:text-orange-600 transition";
+                }
+            });
+
+            renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderContent() {
+            const container = document.getElementById('main-content');
+            
+            if (currentTab === 'home') {
+                container.innerHTML = `
+                    <div class="p-5 space-y-6">
+                        <!-- Hero Banner Card -->
+                        <div class="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-orange-500 to-amber-600 text-white p-6">
+                            <div class="absolute -right-6 -bottom-6 opacity-10">
+                                <i data-lucide="map-pin" class="w-48 h-48"></i>
+                            </div>
+                            <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-medium inline-block mb-3">🍁 가을 드라이브 추천 코스</span>
+                            <h2 class="text-2xl font-black mb-2">아산 힐링 당일치기 가이드</h2>
+                            <p class="text-orange-100 text-sm mb-4 leading-relaxed">수원 출발 자차 연계, 곡교천 은행나무길과 온양온천 5일장의 활기를 담은 11월 4일 맞춤형 여행 코스!</p>
+                            <div class="flex flex-wrap gap-2 pt-2 border-t border-white/20 text-xs">
+                                <span class="bg-black/20 px-2.5 py-1 rounded-md flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i> 11월 4일 (수)</span>
+                                <span class="bg-black/20 px-2.5 py-1 rounded-md flex items-center"><i data-lucide="car" class="w-3.5 h-3.5 mr-1.5"></i> 자차 드라이브</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-orange-50 p-4 rounded-xl border border-orange-100 flex items-center space-x-3">
+                                <div class="bg-orange-500 text-white p-2.5 rounded-lg">
+                                    <i data-lucide="store" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xs text-slate-500 font-medium">특별 이벤트</h3>
+                                    <p class="text-sm font-bold text-slate-800">풍물 5일장 개장</p>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-center space-x-3">
+                                <div class="bg-amber-500 text-white p-2.5 rounded-lg">
+                                    <i data-lucide="clock" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xs text-slate-500 font-medium">추천 시간대</h3>
+                                    <p class="text-sm font-bold text-slate-800">08:30 ~ 20:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Navigation Buttons -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="switchTab('schedule')" class="bg-slate-50 hover:bg-slate-100 p-4 rounded-xl border border-slate-200 text-center transition flex flex-col items-center">
+                                <i data-lucide="calendar-check" class="w-6 h-6 text-orange-600 mb-2"></i>
+                                <span class="text-xs font-bold text-slate-700">전체 일정표</span>
+                            </button>
+                            <button onclick="switchTab('map')" class="bg-slate-50 hover:bg-slate-100 p-4 rounded-xl border border-slate-200 text-center transition flex flex-col items-center">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-600 mb-2"></i>
+                                <span class="text-xs font-bold text-slate-700">동선 지도</span>
+                            </button>
+                            <button onclick="switchTab('food')" class="bg-slate-50 hover:bg-slate-100 p-4 rounded-xl border border-slate-200 text-center transition flex flex-col items-center">
+                                <i data-lucide="utensils" class="w-6 h-6 text-orange-600 mb-2"></i>
+                                <span class="text-xs font-bold text-slate-700">맛집 & 카페</span>
+                            </button>
+                        </div>
+
+                        <!-- Today's Highlights Preview -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-base">✨ 코스 하이라이트</h3>
+                                <button onclick="switchTab('schedule')" class="text-xs text-orange-600 font-semibold hover:underline">모두 보기</button>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start space-x-3">
+                                    <div class="bg-orange-100 text-orange-600 p-2 rounded-lg font-bold text-xs mt-0.5">01</div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-center">
+                                            <h4 class="font-bold text-slate-800 text-sm">곡교천 은행나무길</h4>
+                                            <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">08:30</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1">황금빛 단풍 터널 속 여유로운 아침 산책 및 골든타임 주차 확보</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start space-x-3">
+                                    <div class="bg-orange-100 text-orange-600 p-2 rounded-lg font-bold text-xs mt-0.5">02</div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-center">
+                                            <h4 class="font-bold text-slate-800 text-sm">온양온천 시장 & 5일장</h4>
+                                            <span class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">10:15</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1">11월 4일 장날 구경과 62년 전통 고려제과 빵 쇼핑 및 칼국수 점심</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'schedule') {
+                container.innerHTML = `
+                    <div class="p-5 space-y-4">
+                        <div class="mb-2">
+                            <h2 class="text-xl font-bold text-slate-800">📅 당일치기 상세 일정표</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">분초 단위로 최적화된 아산 드라이브 코스입니다.</p>
+                        </div>
+                        
+                        <div class="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-orange-200">
+                            ${tripData.schedule.map((item, idx) => `
+                                <div class="relative pl-8">
+                                    <div class="absolute left-2.5 top-1.5 w-3 h-3 bg-orange-600 rounded-full ring-4 ring-orange-100 transform -translate-x-1/2"></div>
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-orange-300 transition">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded">${item.time}</span>
+                                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${item.category}</span>
+                                        </div>
+                                        <h3 class="font-bold text-slate-800 text-base mb-1">${item.title}</h3>
+                                        <p class="text-xs text-slate-500 mb-2 flex items-center"><i data-lucide="navigation" class="w-3.5 h-3.5 mr-1 text-slate-400"></i> ${item.transport}</p>
+                                        <div class="bg-slate-50 p-2.5 rounded-lg text-xs text-slate-600 mb-3 border border-slate-100">
+                                            💡 ${item.tip}
+                                        </div>
+                                        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                                            <span class="text-xs text-slate-400">체류: ${item.duration}</span>
+                                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(item.mapQuery)}" target="_blank" class="bg-orange-50 text-orange-600 hover:bg-orange-100 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center">
+                                                <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i> 길찾기
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'map') {
+                container.innerHTML = `
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">🗺️ 인터랙티브 동선 & 지도</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">자차 이동 경로 순서와 주요 방문 포인트입니다.</p>
+                        </div>
+
+                        <!-- Visual Route Flow Box -->
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-md space-y-3">
+                            <h3 class="text-sm font-bold text-orange-400 flex items-center"><i data-lucide="route" class="w-4 h-4 mr-1.5"></i> 드라이브 이동 경로</h3>
+                            <div class="flex flex-col space-y-2 text-xs text-slate-300">
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">1</span> <span>수원 출발 ➔ 곡교천 은행나무길</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">2</span> <span>온양온천 전통시장 & 5일장</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">3</span> <span>온양 족욕체험장 (도보 3분)</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">4</span> <span>온양민속박물관 & 구정아트센터</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">5</span> <span>신정호 지방정원 (일몰/산책)</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">6</span> <span>먼구리식당 (오삼불고기 저녁)</span></div>
+                                <div class="flex items-center space-x-2"><span class="w-5 h-5 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-[10px]">7</span> <span>함가네 호떡 야식 ➔ 수원 귀가</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Location Cards with Direct Link -->
+                        <div class="space-y-3">
+                            <h3 class="font-bold text-slate-800 text-sm">📍 장소별 빠른 길찾기</h3>
+                            ${tripData.schedule.map(item => `
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
+                                    <div>
+                                        <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded font-medium">${item.time}</span>
+                                        <h4 class="font-bold text-slate-800 text-sm mt-1">${item.title}</h4>
+                                        <p class="text-xs text-slate-500">${item.transport}</p>
+                                    </div>
+                                    <a href="https://map.naver.com/v5/search/${encodeURIComponent(item.mapQuery)}" target="_blank" class="bg-slate-900 text-white hover:bg-slate-800 text-xs font-medium px-3 py-2 rounded-lg transition flex items-center space-x-1">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                        <span>지도보기</span>
+                                    </a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'food') {
+                container.innerHTML = `
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">🍽️ 코스 내 미식 & 디저트</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">로컬 노포부터 디저트 맛집까지 엄선된 정보입니다.</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            ${tripData.food.map((f, idx) => `
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">맛집 ${idx+1}</span>
+                                            <h3 class="font-bold text-slate-800 text-base mt-1">${f.name}</h3>
+                                        </div>
+                                        <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg">${f.price}</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-700">대표메뉴: <span class="text-orange-600">${f.menu}</span></p>
+                                    <p class="text-xs text-slate-500 leading-relaxed">${f.desc}</p>
+                                    <div class="bg-slate-50 p-2 rounded text-[11px] text-slate-600 border border-slate-100 flex items-center">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-slate-400"></i> ${f.timing}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'tips') {
+                container.innerHTML = `
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">🛡️ 데이터 분석가의 운영 리스크 방어 팁</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">실제 여행 시 꼭 체크해야 할 핵심 주의사항입니다.</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            ${tripData.tips.map((tip, idx) => `
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-6 h-6 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-xs">!</div>
+                                        <h3 class="font-bold text-slate-800 text-sm">${tip.title}</h3>
+                                    </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed pl-8">${tip.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl text-center space-y-2 mt-4">
+                            <h4 class="font-bold text-orange-800 text-sm">💡 스마트 가이드북 활용법</h4>
+                            <p class="text-xs text-orange-700 leading-relaxed">스마트폰에서 언제든지 각 일정의 '길찾기' 버튼을 눌러 네이버 지도와 연동하여 편리하게 아산 여행을 즐기세요!</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Re-initialize Lucide Icons after rendering
+            lucide.createIcons();
+        }
+
+        function openToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Initial Load on Window Load
+        window.onload = function() {
+            switchTab('home');
+        };
+    </script>
+</body>
+</html>
